@@ -1,5 +1,5 @@
 import streamlit as st
-from google import genai
+import google.generativeai as genai
 import json # Asegúrate de que json está importado
 
 # --- 1. CONFIGURACIÓN E INICIALIZACIÓN ---
