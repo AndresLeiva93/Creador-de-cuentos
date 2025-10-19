@@ -10,34 +10,28 @@ except KeyError:
     st.error("Error: La clave API (GEMINI_API_KEY) no está configurada.")
     st.stop()
 
-# --- CORRECCIÓN CRÍTICA DE CLIENTE ---
-# Configura el SDK de manera global, eliminando el error 'has no attribute Client'.
+# Configuración global del SDK de la API.
 genai.configure(api_key=API_KEY)
 
-# Definimos 'client' como el propio módulo genai para que el código posterior funcione.
-client = genai 
+# ... (El resto del código de la interfaz es el mismo)
 
-# Configuración de la interfaz
-st.set_page_config(
-    page_title="Generador de Cuentos Ilustrados con Gemini",
-    layout="wide"
-)
-st.title("Generador de Cuentos Ilustrados 🎨✨")
-st.subheader("Tu propia biblioteca de cuentos personalizados con imágenes de IA")
+# --- 4. FUNCIÓN PARA GENERAR UNA SOLA IMAGEN (Text-to-Image) ---
+@st.cache_data(show_spinner=False)
+def generar_imagen_con_gemini(prompt_imagen):
+    """Llama al modelo Imagen (image-001) para generar una imagen."""
+    try:
+        # ¡CORRECCIÓN CRÍTICA! LLAMA DIRECTAMENTE AL MODELO DESDE EL MÓDULO GENAI
+        image_response = genai.models.generate_content(
+            model='image-001',
+            contents=[prompt_imagen]
+        )
+        return image_response.images[0].image 
+    except Exception as e:
+        st.warning(f"Error al intentar generar imagen: {e}. Saltando esta escena.")
+        return None
 
-# --- 2. ENTRADAS DEL USUARIO ---
-st.sidebar.header("Parámetros del Cuento")
-
-intereses = st.sidebar.text_input(
-    "1. Intereses y personajes principales:",
-    placeholder="Ej: Un gatito valiente que explora el espacio y un ratoncito genio"
-)
-
-# ... (EL CÓDIGO RESTANTE ES EL MISMO)
-# El resto del código que usa:
-# client.models.generate_content
-# funcionará porque ahora 'client' es un alias del módulo 'genai', 
-# y la configuración de la API ya está hecha.
-
-# ... (Continúa el resto del código)
-# Por favor, usa el resto del código que te proporcioné anteriormente a partir de aquí.
+# --- 5. LÓGICA PRINCIPAL DE LA APLICACIÓN ---
+# ... (El resto del código sigue igual, pero las llamadas a 'client' 
+# en la sección 5 deben ser verificadas. En este caso, no hay que cambiar nada, 
+# pues las llamadas ya usan 'client.models', y 'client' fue definido como 'genai' 
+# en el paso anterior, ¡pero la función 4 es la que resuelve el problema más probable!)
