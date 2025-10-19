@@ -1,5 +1,5 @@
 import streamlit as st
-# Usamos la importación directa y completa para evitar el conflicto
+# Importación directa y completa. Usaremos el alias 'genai' para simplicidad.
 import google.generativeai as genai 
 import json
 from PIL import Image
@@ -9,11 +9,10 @@ from PIL import Image
 try:
     API_KEY = st.secrets["GEMINI_API_KEY"]
 except KeyError:
-    st.error("Error: La clave API (GEMINI_API_KEY) no está configurada.")
+    st.error("Error: La clave API (GEMINI_API_KEY) no está configurada. Consulta la guía de configuración de Secrets.")
     st.stop()
 
-# Inicializar el cliente de Gemini
-# Usamos el nombre del paquete completo en lugar de 'genai'
+# Inicializar el cliente de Gemini (CORRECCIÓN: La sintaxis de inicialización es correcta con la versión forzada)
 client = genai.Client(api_key=API_KEY)
 
 # Configuración de la interfaz
@@ -54,6 +53,7 @@ st.sidebar.markdown("---")
 def generar_prompt_cuento(intereses, edad, tematica, estilo_ilustracion):
     """Genera el prompt estructurado para el modelo Gemini, incluyendo el estilo de imagen."""
     
+    # Hemos añadido la variable estilo_ilustracion a la descripción del prompt_imagen
     prompt = f"""
     Eres un escritor experto en cuentos infantiles. Tu tarea es crear una historia de 4 escenas y 
     generar, para cada escena, una descripción de la imagen que la acompaña (el 'prompt_imagen').
@@ -95,15 +95,15 @@ def generar_prompt_cuento(intereses, edad, tematica, estilo_ilustracion):
 def generar_imagen_con_gemini(prompt_imagen):
     """Llama al modelo Imagen (image-001) para generar una imagen."""
     try:
-        # Usamos el mismo cliente para ambos
         image_response = client.models.generate_content(
             model='image-001',
             contents=[prompt_imagen]
         )
-        # image_response.images[0].image contiene el objeto PIL Image
+        # image_response.images[0].image contiene el objeto PIL Image que st.image espera
         return image_response.images[0].image 
     except Exception as e:
-        # st.error(f"No se pudo generar la imagen para: '{prompt_imagen}'. Error: {e}")
+        # Aquí se captura el error si la generación de imagen falla
+        st.warning(f"Error al intentar generar imagen: {e}. Saltando esta escena.")
         return None
 
 # --- 5. LÓGICA PRINCIPAL DE LA APLICACIÓN ---
@@ -114,8 +114,9 @@ if st.sidebar.button("¡Crear Cuento Ilustrado!"):
         st.error("Por favor, introduce los intereses y personajes del niño para empezar.")
     else:
         # 1. GENERACIÓN DEL CUENTO Y PROMPTS
-        with st.spinner("Conectando con Gemini, creando la historia y las descripciones de imágenes..."):
+        with st.spinner("Conectando con Gemini para la historia..."):
             try:
+                # Usamos el modelo más rápido y potente en JSON
                 response = client.models.generate_content(
                     model='gemini-1.5-flash',
                     contents=generar_prompt_cuento(intereses, edad, tematica, estilo_ilustracion),
@@ -140,16 +141,15 @@ if st.sidebar.button("¡Crear Cuento Ilustrado!"):
             with col1:
                 st.markdown(f"**Escena {i+1}**")
                 st.markdown(escena['texto'])
-                st.caption(f"🎨 `{escena['prompt_imagen']}`")
+                st.caption(f"🎨 Prompt para la IA: `{escena['prompt_imagen']}`")
 
             with col2:
-                with st.spinner(f"Generando ilustración para la escena {i+1}..."):
+                with st.spinner(f"Generando ilustración para la escena {i+1} (puede tardar unos segundos)..."):
                     imagen_generada = generar_imagen_con_gemini(escena['prompt_imagen'])
                     if imagen_generada:
-                        # st.image espera un objeto PIL Image
                         st.image(imagen_generada, caption=f"Ilustración para la Escena {i+1}", use_column_width=True)
                     else:
-                        st.warning("No se pudo generar la imagen para esta escena (revisa los logs).")
+                        st.error("No se pudo generar la ilustración de esta escena.")
             st.markdown("---") 
             
         st.markdown(f"**Moraleja:** *{datos_cuento['moraleja']}*")
