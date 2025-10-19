@@ -1,3 +1,3 @@
 streamlit
-google-generativeai # Es la librería correcta para la API de Gemini
-Pillow # A veces es necesaria para el manejo de imágenes si streamlit lo necesita
+google-genai # Usamos el nombre 'google-genai' en lugar de 'google-generativeai'
+Pillow
