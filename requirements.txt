@@ -1,3 +1,3 @@
 streamlit
-google-genai # Usamos el nombre 'google-genai' en lugar de 'google-generativeai'
+google-generativeai==0.8.0
 Pillow
